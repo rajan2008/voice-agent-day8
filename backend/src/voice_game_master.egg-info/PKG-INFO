@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: voice-game-master
+Version: 1.0.0
+Summary: D&D-style Voice Game Master built with LiveKit Agents
+Requires-Python: >=3.9
+Requires-Dist: livekit-agents[assemblyai,deepgram,google,openai,silero,turn-detector]~=1.2
+Requires-Dist: livekit-murf>=0.1.0
+Requires-Dist: livekit-plugins-noise-cancellation~=0.2
+Requires-Dist: python-dotenv
