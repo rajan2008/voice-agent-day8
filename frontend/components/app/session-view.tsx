@@ -13,8 +13,11 @@ import { useDebugMode } from '@/hooks/useDebug';
 import { ScrollArea } from '../livekit/scroll-area/scroll-area';
 import { VoiceVisualizer } from './voice-visualizer';
 import { ChatMessage } from './chat-message';
+import { ProductGrid } from './product-grid';
+import { OrderHistory } from './order-history';
 import { cn } from '@/lib/utils';
 import { useChat } from '@livekit/components-react';
+import { ShoppingBag, Receipt } from '@phosphor-icons/react';
 
 const MotionBottom = motion.create('div');
 
@@ -73,6 +76,7 @@ export const SessionView = ({
   const [agentSpeaking, setAgentSpeaking] = useState(false);
   const [userSpeaking, setUserSpeaking] = useState(false);
   const [textInput, setTextInput] = useState('');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { send: sendChat } = useChat();
 
@@ -118,14 +122,85 @@ export const SessionView = ({
     }
   }, [messages]);
 
+  const handleProductBuy = (product: any) => {
+    // Send message to agent to add product to cart
+    const message = `Add ${product.name} to my cart`;
+    sendChat(message);
+  };
+
   return (
-    <section className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative z-10 h-full w-full overflow-hidden flex flex-col" {...props}>
+    <section className="bg-gradient-to-br from-slate-50 via-white to-slate-100 relative z-10 h-full w-full overflow-hidden flex flex-col" {...props}>
+      {/* Top Header/Navbar */}
+      <div className="w-full border-b border-slate-200 bg-white/95 backdrop-blur-sm shadow-sm">
+        <div className="px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg">
+              <ShoppingBag size={24} weight="fill" className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">
+                Voice Shopping Store
+              </h1>
+              <p className="text-sm text-slate-400">Shop with your voice</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-xs text-slate-500">Connected</p>
+              <p className="text-sm text-green-600 font-semibold">● Live</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Side: Tabbed View (Products / Orders) */}
+        <div className="w-1/2 border-r border-slate-200 flex flex-col bg-white">
+        {/* Tab Buttons */}
+        <div className="flex border-b border-slate-200 bg-slate-50">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'products'
+                ? 'text-blue-600 border-b-3 border-blue-600 bg-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <ShoppingBag size={20} weight={activeTab === 'products' ? 'fill' : 'regular'} />
+            Products
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'orders'
+                ? 'text-blue-600 border-b-3 border-blue-600 bg-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Receipt size={20} weight={activeTab === 'orders' ? 'fill' : 'regular'} />
+            Orders
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'products' ? (
+            <ProductGrid onProductBuy={handleProductBuy} />
+          ) : (
+            <OrderHistory />
+          )}
+        </div>
+      </div>
+
+        {/* Right Side: Chat Interface */}
+        <div className="w-1/2 flex flex-col bg-slate-50">
       {/* Voice Visualizers with Mic in Center */}
-      <div className="relative px-8 py-8 border-b border-slate-800">
+      <div className="relative px-8 py-8 border-b border-slate-200 bg-white">
         <div className="flex items-center justify-center gap-4">
           {/* Agent Wave - Left */}
           <div className="flex-1">
-            <p className="text-xs text-slate-400 mb-3 text-center">Agent Speaking</p>
+            <p className="text-xs text-slate-600 font-medium mb-3 text-center">Agent Speaking</p>
             <VoiceVisualizer isActive={agentSpeaking} side="left" />
           </div>
 
@@ -182,10 +257,10 @@ export const SessionView = ({
               
               {/* Mic button - no pulsing animation */}
               <button
-                className="relative w-36 h-36 rounded-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-4 border-slate-700/50 shadow-2xl overflow-hidden"
+                className="relative w-36 h-36 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 border-4 border-blue-200 shadow-2xl overflow-hidden"
               >
                 {/* Inner glow - constant */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/20" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 via-transparent to-indigo-400/30" />
                 
                 {/* Mic icon */}
                 <svg className="relative w-16 h-16 text-white drop-shadow-lg" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -193,37 +268,37 @@ export const SessionView = ({
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-slate-300 font-medium">
+            <p className="text-sm text-slate-700 font-semibold">
               {agentSpeaking ? '🎧 Agent Speaking...' : userSpeaking ? '🎤 You Speaking...' : '⚡ Ready to Talk'}
             </p>
           </div>
 
           {/* User Wave - Right */}
           <div className="flex-1">
-            <p className="text-xs text-slate-400 mb-3 text-center">You Speaking</p>
+            <p className="text-xs text-slate-600 font-medium mb-3 text-center">You Speaking</p>
             <VoiceVisualizer isActive={userSpeaking} side="right" />
           </div>
         </div>
       </div>
 
-      {/* Chat Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 px-6 py-6">
-        <div className="mx-auto max-w-4xl">
-          {messages.map((msg) => (
-            <ChatMessage
-              key={msg.id}
-              message={msg.message}
-              isAgent={!msg.from?.isLocal}
-              timestamp={new Date(msg.timestamp)}
-            />
-          ))}
-        </div>
-      </ScrollArea>
+        {/* Chat Messages */}
+        <ScrollArea ref={scrollAreaRef} className="flex-1 px-6 py-6">
+          <div className="mx-auto max-w-full">
+            {messages.map((msg) => (
+              <ChatMessage
+                key={msg.id}
+                message={msg.message}
+                isAgent={!msg.from?.isLocal}
+                timestamp={new Date(msg.timestamp)}
+              />
+            ))}
+          </div>
+        </ScrollArea>
 
-      {/* Bottom Control Bar with Text Input */}
+        {/* Bottom Control Bar with Text Input */}
       <MotionBottom
         {...BOTTOM_VIEW_MOTION_PROPS}
-        className="border-t border-slate-800 bg-slate-900/50 backdrop-blur-sm"
+        className="border-t border-slate-200 bg-white backdrop-blur-sm shadow-lg"
       >
         <div className="relative mx-auto max-w-4xl px-6 py-4">
           {/* Text Input Box */}
@@ -234,12 +309,12 @@ export const SessionView = ({
               onChange={(e) => setTextInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message or use voice..."
-              className="flex-1 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="flex-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button
               onClick={handleSendText}
               disabled={!textInput.trim()}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
             >
               Send
             </button>
@@ -251,6 +326,8 @@ export const SessionView = ({
           </div>
         </div>
       </MotionBottom>
+        </div>
+      </div>
     </section>
   );
 };

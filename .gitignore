@@ -42,3 +42,10 @@ Thumbs.db
 # Build artifacts
 *.tsbuildinfo
 next-env.d.ts
+
+# Runtime data
+orders.json
+
+# Large binaries (users should download separately)
+livekit-server.exe
+livekit-server
